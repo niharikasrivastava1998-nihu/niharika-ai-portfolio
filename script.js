@@ -1,47 +1,35 @@
-// Custom Cursor Logic
-const cursor = document.querySelector('.cursor');
-const cursor2 = document.querySelector('.cursor2');
+// REVEAL ON SCROLL ANIMATION
+const revealElements = document.querySelectorAll('.reveal');
 
-document.addEventListener('mousemove', function(e){
-    cursor.style.cssText = cursor2.style.cssText = "left: " + e.clientX + "px; top: " + e.clientY + "px;";
-});
+const revealOnScroll = () => {
+    const windowHeight = window.innerHeight;
+    const elementVisible = 150;
 
-// Add hover class to cursor when hovering links
-const links = document.querySelectorAll('a, .tags span, .stat-card');
-links.forEach(link => {
-    link.addEventListener('mouseenter', () => {
-        cursor.style.transform = 'scale(2)';
-        cursor.style.borderColor = '#bd00ff';
-    });
-    link.addEventListener('mouseleave', () => {
-        cursor.style.transform = 'scale(1)';
-        cursor.style.borderColor = '#00f2ff';
-    });
-});
-
-// Scroll Animation (Intersection Observer)
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('show');
+    revealElements.forEach((reveal) => {
+        const elementTop = reveal.getBoundingClientRect().top;
+        if (elementTop < windowHeight - elementVisible) {
+            reveal.classList.add('active');
         }
     });
+};
+
+window.addEventListener('scroll', revealOnScroll);
+
+// SYNCHRONIZED MOUSE MOVEMENT (Parallax Blobs)
+// This creates that "interactive" Google Labs feel
+document.addEventListener('mousemove', (e) => {
+    const blobs = document.querySelectorAll('.blob');
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+
+    blobs.forEach((blob, index) => {
+        const speed = (index + 1) * 20; // Different speeds for depth
+        const xOffset = (window.innerWidth / 2 - e.clientX) / speed;
+        const yOffset = (window.innerHeight / 2 - e.clientY) / speed;
+        
+        blob.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+    });
 });
 
-const hiddenElements = document.querySelectorAll('.level-node, .stat-card, .inv-category');
-hiddenElements.forEach((el) => observer.observe(el));
-
-// Add CSS class for animation via JS
-const style = document.createElement('style');
-style.innerHTML = `
-    .level-node, .stat-card, .inv-category {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.8s ease;
-    }
-    .show {
-        opacity: 1;
-        transform: translateY(0);
-    }
-`;
-document.head.appendChild(style);
+// Initial trigger
+revealOnScroll();
